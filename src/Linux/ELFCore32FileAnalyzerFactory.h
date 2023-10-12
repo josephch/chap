@@ -3,8 +3,21 @@
 
 #pragma once
 
+#include <cxxabi.h>
+
 #include "../FileAnalyzerFactory.h"
 #include "ELFCoreFileAnalyzer.h"
+
+using namespace __cxxabiv1;
+
+std::string util_demangle(std::string to_demangle) {
+  int status = 0;
+  char* buff =
+      __cxxabiv1::__cxa_demangle(to_demangle.c_str(), NULL, NULL, &status);
+  std::string demangled = buff;
+  std::free(buff);
+  return demangled;
+}
 
 namespace chap {
 namespace Linux {
@@ -26,7 +39,15 @@ class ELFCore32FileAnalyzerFactory : public FileAnalyzerFactory {
       std::cerr << "There is not enough memory on this server to process"
                    " this ELF file.\n";
       exit(1);
+    } catch (const std::exception& e) {
+      std::cerr << e.what() << std::endl;
+    } catch (chap::VirtualAddressMap<unsigned int>::NotMapped& ex) {
+      std::cerr << "Exception: NotMapped. Address : " << std::hex << ex._address
+                << std::dec << std::endl;
     } catch (...) {
+      std::cerr << "\nUnknown exception type: '"
+                << util_demangle(__cxa_current_exception_type()->name()) << "'"
+                << std::endl;
     }
     return 0;
   }
