@@ -79,8 +79,10 @@ int main(int argc, char **argv, char ** /* envp */) {
       FileAnalyzer *analyzer =
           (*it)->MakeFileAnalyzer(fileImage, truncationCheckOnly);
       if (analyzer == 0) {
+        cerr << "Analyzer null for " << (*it)->GetSupportedFileFormat() << endl;
         continue;
       }
+      cerr << "Using analyser  " << (*it)->GetSupportedFileFormat() << endl;
       if (analyzer->FileIsKnownTruncated()) {
         cerr << path << " is truncated." << endl;
         uint64_t fileSize = analyzer->GetFileSize();
